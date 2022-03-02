@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".ui.main_menu.MainMenuActivity"
+    android:background="@color/primaryColor"
+    android:gravity="center"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="25dp"
+        android:gravity="center"
+        android:background="@drawable/custom_background"
+        >
+
+        <ImageView
+            android:layout_width="300dp"
+            android:layout_height="150dp"
+            android:src="@drawable/programming_hero_logo"/>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/quiz"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:textSize="40sp"/>
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="25dp"
+        android:layout_marginTop="22dp"
+        android:gravity="center"
+        android:background="@drawable/custom_background"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/highScore"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:textSize="20sp"/>
+
+        <TextView
+            android:id="@+id/highScorePointTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="0 Point"
+            android:textColor="@color/white"
+            android:textStyle="bold"
+            android:textSize="20sp"
+            />
+
+    </LinearLayout>
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginStart="25dp"
+        android:layout_marginEnd="25dp"
+        android:layout_marginTop="22dp"
+        android:gravity="center"
+        android:background="@drawable/custom_background"
+        >
+       <com.google.android.material.button.MaterialButton
+           android:id="@+id/startButton"
+           android:layout_width="150dp"
+           android:layout_height="wrap_content"
+           android:text="Start"
+           android:textAllCaps="false"
+           android:textStyle="bold"
+           android:textSize="20sp"
+           android:textColor="@color/black"
+           app:backgroundTint="@color/white"/>
+
+    </LinearLayout>
+
+
+</LinearLayout>

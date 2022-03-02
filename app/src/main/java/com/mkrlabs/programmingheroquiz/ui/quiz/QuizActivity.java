@@ -23,9 +23,13 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.mkrlabs.programmingheroquiz.R;
+import com.mkrlabs.programmingheroquiz.model.Question;
 import com.mkrlabs.programmingheroquiz.model.Quiz;
 import com.mkrlabs.programmingheroquiz.repository.shred_pref.SharedPref;
 import com.mkrlabs.programmingheroquiz.ui.main_menu.MainMenuActivity;
+
+import java.util.Collections;
+import java.util.List;
 
 public class QuizActivity extends AppCompatActivity implements QuizContract.View{
 
@@ -212,11 +216,16 @@ public class QuizActivity extends AppCompatActivity implements QuizContract.View
     private Quiz quiz;
     @Override
     public void quizList(Quiz quizItem) {
+        Collections.shuffle(quizItem.getQuestions());
         this.quiz = quizItem;
+
+
         qsCountTV.setText(questionCountPreviewText(position,quizItem.getQuestions().size()));
         setQuestionWithAnimation(qsTV,0,quiz.getQuestions().get(position).getQuestion());
         questionScoreTV.setText(quiz.getQuestions().get(position).getScore().toString() +" Point");
         setOnOptionsButtonClickListener();
+
+
     }
 
     private String questionCountPreviewText(int position, int size){
@@ -230,6 +239,9 @@ public class QuizActivity extends AppCompatActivity implements QuizContract.View
 
     }
     void setQuestionWithAnimation(View view , int value, String data){
+        enabledOption(false);
+        System.out.println("Button disabled");
+
         view.animate().alpha(value).scaleX(value).scaleY(value).setDuration(500).setStartDelay(100)
                 .setInterpolator(new DecelerateInterpolator()).setListener(new Animator.AnimatorListener() {
             @Override
@@ -268,6 +280,8 @@ public class QuizActivity extends AppCompatActivity implements QuizContract.View
 
             @Override
             public void onAnimationEnd(Animator animator) {
+                enabledOption(true);
+                System.out.println("Button enabled");
 
                 if (value==0){
                     try {

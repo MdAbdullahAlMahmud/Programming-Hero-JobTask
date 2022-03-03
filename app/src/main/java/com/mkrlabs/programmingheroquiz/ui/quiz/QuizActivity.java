@@ -14,7 +14,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
@@ -23,11 +22,12 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.mkrlabs.programmingheroquiz.R;
-import com.mkrlabs.programmingheroquiz.model.Question;
 import com.mkrlabs.programmingheroquiz.model.Quiz;
+import com.mkrlabs.programmingheroquiz.model.ShuffleAnsKey;
 import com.mkrlabs.programmingheroquiz.repository.shred_pref.SharedPref;
 import com.mkrlabs.programmingheroquiz.ui.main_menu.MainMenuActivity;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -36,7 +36,6 @@ public class QuizActivity extends AppCompatActivity implements QuizContract.View
     private QuizPresenter presenter;
     private ProgressBar quizProgressBar;
     private LinearLayout container;
-    private Button quizNextButton;
     private TextView qsTV;
     private int count;
     private int score = 0;
@@ -54,23 +53,16 @@ public class QuizActivity extends AppCompatActivity implements QuizContract.View
         initialize();
         sharedPref = new SharedPref(this);
         presenter = new QuizPresenter(this);
-        quizNextButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                generateQuestion();
-            }
-        });
-
 
     }
 
     private void generateQuestion(){
-        quizNextButton.setEnabled(false);
-        quizNextButton.setAlpha(.5f);
         enabledOption(true);
         qsCountTV.setText(questionCountPreviewText(position+1,quiz.getQuestions().size()));
         position++;
+
         if (position<quiz.getQuestions().size()){
+            getRandomQuestionOption(true);
             count=0;
             setQuestionWithAnimation(qsTV,0,quiz.getQuestions().get(position).getQuestion());
             questionScoreTV.setText(quiz.getQuestions().get(position).getScore().toString() +" Point");
@@ -101,7 +93,6 @@ public class QuizActivity extends AppCompatActivity implements QuizContract.View
         quizProgressBar = findViewById(R.id.quizProgressBar);
         container=findViewById(R.id.optionContainer);
         qsTV=findViewById(R.id.questionTV);
-        quizNextButton=findViewById(R.id.quizNextButton);
         qsCountTV=findViewById(R.id.qsCountTV);
         questionScoreTV=findViewById(R.id.questionScoreTV);
         questionImage=findViewById(R.id.questionImage);
@@ -109,6 +100,9 @@ public class QuizActivity extends AppCompatActivity implements QuizContract.View
         questionHeaderHolderCardView = findViewById(R.id.questionHeaderHolderCardView);
         questionOptionsLinearLayout = findViewById(R.id.questionOptionsLinearLayout);
         quizToolbar = findViewById(R.id.quizToolbar);
+        optionList = new ArrayList<>();
+
+
     }
 
     private void setOnOptionsButtonClickListener() {
@@ -118,35 +112,27 @@ public class QuizActivity extends AppCompatActivity implements QuizContract.View
             container.getChildAt(i).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    checkAnswer((AppCompatButton) view , index);
+                    checkAnswer((AppCompatButton) view );
                 }
             });
         }
     }
-    private void checkAnswer(AppCompatButton selectedButton,int index) {
+    private void checkAnswer(AppCompatButton selectedButton) {
         enabledOption(false);
 
-        String selectedOption;
-        switch (index){
-            case 0:
-                selectedOption = "A";
-                break;
-            case 1:
-                selectedOption = "B";
-                break;
-            case 2:
-                selectedOption = "C";
-                break;
-            case 3:
-                selectedOption = "D";
-                break;
+        String selectedOption = null;
 
-            default:
-                throw new IllegalStateException("Unexpected value: " + index);
+        String userSelectedAns = selectedButton.getText().toString();
+
+        for (ShuffleAnsKey s:optionList) {
+            if (userSelectedAns.equals(s.getAns())){
+                selectedOption = s.getKey();
+            }
         }
 
         if (selectedOption.equals(quiz.getQuestions().get(position).getCorrectAnswer())){
-            score= score+quiz.getQuestions().get(position).getScore();
+            score= score + quiz.getQuestions().get(position).getScore();
+            totalScoreTV.setText("Score: "+score);
             selectedButton.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#4CAF50")));
 
         }else {
@@ -155,10 +141,7 @@ public class QuizActivity extends AppCompatActivity implements QuizContract.View
             AppCompatButton correctAnsButton = (AppCompatButton) container.findViewWithTag(getTagFromCorrectOption(position,quiz.getQuestions().get(position).getCorrectAnswer()));
             correctAnsButton.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#4CAF50")));
         }
-        totalScoreTV.setText("Score: "+score);
 
-        quizNextButton.setEnabled(true);
-        quizNextButton.setAlpha(1f);
 
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -166,6 +149,7 @@ public class QuizActivity extends AppCompatActivity implements QuizContract.View
                 generateQuestion();
             }
         },3000);
+
     }
 
     private String getTagFromCorrectOption(int position,String ans){
@@ -224,6 +208,7 @@ public class QuizActivity extends AppCompatActivity implements QuizContract.View
         setQuestionWithAnimation(qsTV,0,quiz.getQuestions().get(position).getQuestion());
         questionScoreTV.setText(quiz.getQuestions().get(position).getScore().toString() +" Point");
         setOnOptionsButtonClickListener();
+        getRandomQuestionOption(true);
 
 
     }
@@ -240,8 +225,6 @@ public class QuizActivity extends AppCompatActivity implements QuizContract.View
     }
     void setQuestionWithAnimation(View view , int value, String data){
         enabledOption(false);
-        System.out.println("Button disabled");
-
         view.animate().alpha(value).scaleX(value).scaleY(value).setDuration(500).setStartDelay(100)
                 .setInterpolator(new DecelerateInterpolator()).setListener(new Animator.AnimatorListener() {
             @Override
@@ -250,39 +233,27 @@ public class QuizActivity extends AppCompatActivity implements QuizContract.View
                 if(value==0 && count<4){
                     String option ="";
                     if(count==0){
-                        option=quiz.getQuestions().get(position).getAnswers().getA();
-
+                        isQuestionOptionNull(count);
+                        option=getRandomQuestionOption(false).get(0).getAns();
                     }else if(count==1){
-                        option=quiz.getQuestions().get(position).getAnswers().getB();
+                        isQuestionOptionNull(count);
+                        option=getRandomQuestionOption(false).get(1).getAns();
+
                     }else if(count==2){
-
-                        if (quiz.getQuestions().get(position).getAnswers().getC()==null){
-                            container.getChildAt(count).setVisibility(View.GONE);
-                        }else {
-                            container.getChildAt(count).setVisibility(View.VISIBLE);
-                        }
-                        option=quiz.getQuestions().get(position).getAnswers().getC();
-
+                        isQuestionOptionNull(count);
+                        option=getRandomQuestionOption(false).get(2).getAns();
                     } else if (count==3) {
-                        if (quiz.getQuestions().get(position).getAnswers().getD()==null){
-                            container.getChildAt(count).setVisibility(View.GONE);
-                        }else {
-                            container.getChildAt(count).setVisibility(View.VISIBLE);
-                        }
-
-                        option=quiz.getQuestions().get(position).getAnswers().getD();
+                        isQuestionOptionNull(count);
+                        option=getRandomQuestionOption(false).get(3).getAns();
                     }
                     setQuestionWithAnimation(container.getChildAt(count),0,option);
                     count++;
-
                 }
             }
 
             @Override
             public void onAnimationEnd(Animator animator) {
                 enabledOption(true);
-                System.out.println("Button enabled");
-
                 if (value==0){
                     try {
                         ((TextView)view).setText(data);
@@ -296,10 +267,32 @@ public class QuizActivity extends AppCompatActivity implements QuizContract.View
 
             @Override
             public void onAnimationCancel(Animator animator) { }
-
             @Override
             public void onAnimationRepeat(Animator animator) { }
         });
+    }
+
+    private void isQuestionOptionNull(int index){
+        if (getRandomQuestionOption(false).get(index).getAns()==null){
+            container.getChildAt(index).setVisibility(View.GONE);
+        }else {
+            container.getChildAt(index).setVisibility(View.VISIBLE);
+        }
+    }
+    private List<ShuffleAnsKey> optionList;
+
+    private List<ShuffleAnsKey> getRandomQuestionOption(boolean shouldShuffle){
+
+        if (shouldShuffle){
+            optionList.clear();
+            optionList.add(new ShuffleAnsKey(quiz.getQuestions().get(position).getAnswers().getA(),"A"));
+            optionList.add(new ShuffleAnsKey(quiz.getQuestions().get(position).getAnswers().getB(),"B"));
+            optionList.add(new ShuffleAnsKey(quiz.getQuestions().get(position).getAnswers().getC(),"C"));
+            optionList.add(new ShuffleAnsKey(quiz.getQuestions().get(position).getAnswers().getD(),"D"));
+            Collections.shuffle(optionList);
+        }
+        return optionList;
+
     }
 
     private void loadImageIfExists(String questionImageUrl) {

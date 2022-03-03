@@ -60,7 +60,6 @@ public class QuizActivity extends AppCompatActivity implements QuizContract.View
         enabledOption(true);
         qsCountTV.setText(questionCountPreviewText(position+1,quiz.getQuestions().size()));
         position++;
-
         if (position<quiz.getQuestions().size()){
             getRandomQuestionOption(true);
             count=0;
@@ -76,7 +75,6 @@ public class QuizActivity extends AppCompatActivity implements QuizContract.View
                 questionImage.setVisibility(View.GONE);
                 questionImage.setImageResource(R.drawable.programming_hero_logo);
             }
-
         }else {
 
             if (score>sharedPref.getHighScore()){
@@ -101,8 +99,6 @@ public class QuizActivity extends AppCompatActivity implements QuizContract.View
         questionOptionsLinearLayout = findViewById(R.id.questionOptionsLinearLayout);
         quizToolbar = findViewById(R.id.quizToolbar);
         optionList = new ArrayList<>();
-
-
     }
 
     private void setOnOptionsButtonClickListener() {
@@ -131,6 +127,7 @@ public class QuizActivity extends AppCompatActivity implements QuizContract.View
         }
 
         if (selectedOption.equals(quiz.getQuestions().get(position).getCorrectAnswer())){
+            //Right Ans
             score= score + quiz.getQuestions().get(position).getScore();
             totalScoreTV.setText("Score: "+score);
             selectedButton.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor("#4CAF50")));
@@ -183,7 +180,6 @@ public class QuizActivity extends AppCompatActivity implements QuizContract.View
         questionHeaderHolderCardView.setVisibility(View.INVISIBLE);
         questionOptionsLinearLayout.setVisibility(View.INVISIBLE);
         quizToolbar.setVisibility(View.INVISIBLE);
-
         quizProgressBar.setVisibility(View.VISIBLE);
 
     }

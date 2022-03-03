@@ -29,7 +29,8 @@ public class Question {
         this.question = question;
     }
 
-    public Answers getAnswers() {
+    public Answers getAnswers()
+    {
         return answers;
     }
 
